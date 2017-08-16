@@ -14,7 +14,7 @@ class GitRepoSpec extends Specification {
     File tmpFile
 
     def setup () {
-        tmpDir = File.createTempDir("/tmp/testRepoDir-", "")
+        tmpDir = File.createTempDir("testRepoDir-", "")
         tmpFile = File.createTempFile("testFile", "", tmpDir)
         tmpDir.deleteOnExit()
     }
@@ -23,8 +23,8 @@ class GitRepoSpec extends Specification {
         when:
         GitRepo repo = new GitRepo(tmpDir)
         repo.initialize()
-        "sync".execute()
         then:
+        "sync".execute()
         repo.repoDir.exists() && new File (repo.repoDir, ".git").exists()
     }
 
@@ -32,6 +32,7 @@ class GitRepoSpec extends Specification {
         when:
         GitRepo repo = new GitRepo(tmpDir).initialize()
         then:
+        "sync".execute()
         repo.add([tmpFile])
     }
 
@@ -39,8 +40,8 @@ class GitRepoSpec extends Specification {
         when:
         GitRepo repo = new GitRepo (tmpDir).initialize()
         repo.add([tmpFile])
-        "sync".execute()
         then:
+        "sync".execute()
         repo.commit("testfile")
     }
 
@@ -49,8 +50,8 @@ class GitRepoSpec extends Specification {
         GitRepo repo = new GitRepo (tmpDir).initialize()
         repo.add([tmpFile])
         repo.commit("testfile")
-        "sync".execute()
         then:
+        "sync".execute()
         repo.lastCommitHash(true).matches(~ /^[0-9a-f]+$/)
     }
 
@@ -60,8 +61,8 @@ class GitRepoSpec extends Specification {
         repo.add([tmpFile])
         repo.commit("testfile")
         tmpFile.write("hallo")
-        "sync".execute()
         then:
+        "sync".execute()
         repo.modifiedObjects() == [tmpFile.toString()]
     }
 
@@ -70,8 +71,8 @@ class GitRepoSpec extends Specification {
         GitRepo repo = new GitRepo (tmpDir).initialize()
         repo.add([tmpFile])
         repo.commit("testfile")
-        "sync".execute()
         then:
+        "sync".execute()
         (repo.lastCommitDate(true) =~ /^\S{3}\s\S{3}\s\d{1,2}\s\d{2}:\d{2}:\d{2}\s\d{4}\s[+-]\d{4}$/) as Boolean
     }
 
@@ -81,16 +82,18 @@ class GitRepoSpec extends Specification {
         tmpFile.write("hallo")
         repo.add([tmpFile])
         // This test tends to fail without "sync" of the target filesystem, probably because the git data are not flushed.
-        "sync".execute()
         then:
+        "sync".execute()
         repo.isDirty()
         when:
         repo.commit("testmessage")
         then:
+        "sync".execute()
         !repo.isDirty()
         when:
         tmpFile.write("modified hello")
         then:
+        "sync".execute()
         repo.isDirty()
     }
 
@@ -99,8 +102,8 @@ class GitRepoSpec extends Specification {
         GitRepo repo = new GitRepo (tmpDir).initialize()
         repo.add([tmpFile])
         repo.commit("testmessage")
-        "sync".execute()
         then:
+        "sync".execute()
         repo.tag("testname", "testmessage", false)
     }
 

@@ -1,10 +1,7 @@
 language: groovy
 sudo: required
 before_cache:
-- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y git
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 cache:
   directories:
   - "$HOME/.gradle/caches/"
