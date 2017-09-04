@@ -16,7 +16,7 @@ class GitRepo {
      }
 
     String[] gitCommand (String... command) {
-        return ["git", "--no-pager", "-C", "${repoDir}/"] + command.toList() as String[]
+        return ["git", "--no-pager", "--git-dir", "${repoDir}/.git", "--work-tree", "${repoDir}/"] + command.toList() as String[]
     }
 
     private LinkedList<String> execute (String... command) {
