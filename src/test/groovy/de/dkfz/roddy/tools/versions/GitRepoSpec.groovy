@@ -10,6 +10,7 @@ import spock.lang.Specification
 
 class GitRepoSpec extends Specification {
 
+    Long threadSleep = 100
     File tmpDir
     File tmpFile
 
@@ -24,6 +25,7 @@ class GitRepoSpec extends Specification {
         GitRepo repo = new GitRepo(tmpDir)
         repo.initialize()
         then:
+        Thread.sleep(threadSleep)
         "sync".execute()
         repo.repoDir.exists() && new File (repo.repoDir, ".git").exists()
     }
@@ -32,6 +34,7 @@ class GitRepoSpec extends Specification {
         when:
         GitRepo repo = new GitRepo(tmpDir).initialize()
         then:
+        Thread.sleep(threadSleep)
         "sync".execute()
         repo.add([tmpFile])
     }
@@ -41,6 +44,7 @@ class GitRepoSpec extends Specification {
         GitRepo repo = new GitRepo (tmpDir).initialize()
         repo.add([tmpFile])
         then:
+        Thread.sleep(threadSleep)
         "sync".execute()
         repo.commit("testfile")
     }
@@ -51,6 +55,7 @@ class GitRepoSpec extends Specification {
         repo.add([tmpFile])
         repo.commit("testfile")
         then:
+        Thread.sleep(threadSleep)
         "sync".execute()
         repo.lastCommitHash(true).matches(~ /^[0-9a-f]+$/)
     }
@@ -62,6 +67,7 @@ class GitRepoSpec extends Specification {
         repo.commit("testfile")
         tmpFile.write("hallo")
         then:
+        Thread.sleep(threadSleep)
         "sync".execute()
         repo.modifiedObjects() == [tmpFile.toString()]
     }
@@ -72,6 +78,7 @@ class GitRepoSpec extends Specification {
         repo.add([tmpFile])
         repo.commit("testfile")
         then:
+        Thread.sleep(threadSleep)
         "sync".execute()
         (repo.lastCommitDate(true) =~ /^\S{3}\s\S{3}\s\d{1,2}\s\d{2}:\d{2}:\d{2}\s\d{4}\s[+-]\d{4}$/) as Boolean
     }
@@ -83,16 +90,19 @@ class GitRepoSpec extends Specification {
         repo.add([tmpFile])
         // This test tends to fail without "sync" of the target filesystem, probably because the git data are not flushed.
         then:
+        Thread.sleep(threadSleep)
         "sync".execute()
         repo.isDirty()
         when:
         repo.commit("testmessage")
         then:
+        Thread.sleep(threadSleep)
         "sync".execute()
         !repo.isDirty()
         when:
         tmpFile.write("modified hello")
         then:
+        Thread.sleep(threadSleep)
         "sync".execute()
         repo.isDirty()
     }
@@ -103,6 +113,7 @@ class GitRepoSpec extends Specification {
         repo.add([tmpFile])
         repo.commit("testmessage")
         then:
+        Thread.sleep(threadSleep)
         "sync".execute()
         repo.tag("testname", "testmessage", false)
     }
