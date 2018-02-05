@@ -8,6 +8,7 @@ package de.dkfz.roddy.execution.io;
 
 import de.dkfz.roddy.core.InfoObject;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -20,44 +21,65 @@ public class ExecutionResult extends InfoObject {
     /**
      * This can hold some sort of process id for a process
      */
-    public final String processID;
+    private final String processID;
 
-    /**
-     * Successful or not?
-     */
-    public final boolean successful;
+    private final String standardOutput;
+
+    private final String standardError;
+
+    private final int exitCode;
+
+
+    public ExecutionResult(int exitCode, String standardOutput, String standardError, String processID) {
+        this.processID = processID;
+        this.exitCode = exitCode;
+        this.standardOutput = standardOutput;
+        this.standardError = standardError;
+    }
+
+    public String getProcessID() {
+        return processID;
+    }
+
+    public String getStandardOutput() {
+        return standardOutput;
+    }
+
+    public String getStandardError() {
+        return standardError;
+    }
+
+    public int getExitCode() {
+        return exitCode;
+    }
+
     /**
      * All result lines.
      */
-    public final List<String> resultLines;
+    public List<String> getResultLines() {
+        return Arrays.asList(getStandardOutput().split("\n"));
+    }
+
     /**
      * First line of the result array.
      * Null if no entries are in the array.
      */
-    public final String firstLine;
-
-    public final int exitCode;
-
-    public ExecutionResult(boolean successful, int exitCode, List<String> resultLines, String processID) {
-
-        this.processID = processID;
-        this.successful = successful;
-        this.exitCode = exitCode;
-        this.resultLines = resultLines;
-        if(resultLines.size() > 0)
-            firstLine = resultLines.get(0);
+    public String getFirstLine() {
+        if(getResultLines().size() > 0)
+            return getResultLines().get(0);
         else
-            firstLine = null;
+            return null;
     }
 
     public boolean isSuccessful() {
         return exitCode == 0;
     }
 
+    /*@Deprecated
     public boolean getSuccessful() {
         return isSuccessful();
     }
-
+*/
     @Deprecated
     public int getErrorNumber() { return exitCode; }
 }

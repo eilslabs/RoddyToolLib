@@ -78,7 +78,7 @@ class LocalExecutionHelper {
         //TODO Put to a custom class which can handle things for Windows as well.
         String processID = getProcessID(process)
 
-        List<String> lines = [];
+        String lines = "";
         if (logger.isVerbosityHigh())
             println("Executing the command ${command} locally.");
 
@@ -87,9 +87,9 @@ class LocalExecutionHelper {
         else {
             StringBuilder sstream = new StringBuilder();
             process.waitForProcessOutput(sstream, sstream);
-            lines = sstream.readLines().collect { String l -> return l.toString(); };
+            lines = sstream.readLines().collect { String l -> return l.toString(); }.join("\n");
         }
-        return new ExecutionResult(process.exitValue() == 0, process.exitValue(), lines, processID);
+        return new ExecutionResult(process.exitValue(), lines, lines, processID);
     }
 
     public static Process executeNonBlocking(String command) {
