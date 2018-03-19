@@ -18,27 +18,27 @@ import java.util.List;
  */
 public class ExecutionResult extends InfoObject {
 
-    /**
-     * This can hold some sort of process id for a process
-     */
-    private final String processID;
+    private final int exitCode;
 
     private final String standardOutput;
 
     private final String standardError;
 
-    private final int exitCode;
+    /**
+     * This can hold some sort of process id for a process
+     */
+    private final String processID;
 
 
     public ExecutionResult(int exitCode, String standardOutput, String standardError, String processID) {
-        this.processID = processID;
         this.exitCode = exitCode;
         this.standardOutput = standardOutput;
         this.standardError = standardError;
+        this.processID = processID;
     }
 
-    public String getProcessID() {
-        return processID;
+    public int getExitCode() {
+        return exitCode;
     }
 
     public String getStandardOutput() {
@@ -49,37 +49,26 @@ public class ExecutionResult extends InfoObject {
         return standardError;
     }
 
-    public int getExitCode() {
-        return exitCode;
+    public String getProcessID() {
+        return processID;
+    }
+
+
+    public boolean isSuccessful() {
+        return exitCode == 0;
     }
 
     /**
      * All result lines.
      */
     public List<String> getResultLines() {
-        return Arrays.asList(getStandardOutput().split("\n"));
+        return Arrays.asList(getStandardOutput().split("\\R"));
     }
 
     /**
      * First line of the result array.
-     * Null if no entries are in the array.
      */
     public String getFirstLine() {
-        if(getResultLines().size() > 0)
-            return getResultLines().get(0);
-        else
-            return null;
+        return getResultLines().get(0);
     }
-
-    public boolean isSuccessful() {
-        return exitCode == 0;
-    }
-
-    /*@Deprecated
-    public boolean getSuccessful() {
-        return isSuccessful();
-    }
-*/
-    @Deprecated
-    public int getErrorNumber() { return exitCode; }
 }
