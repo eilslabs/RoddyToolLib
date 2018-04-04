@@ -37,6 +37,10 @@ public class ExecutionResult extends InfoObject {
         this.processID = processID;
     }
 
+    public ExecutionResult(int exitCode, String standardOutput, String standardError) {
+        this(exitCode, standardOutput, standardError, null);
+    }
+
     public int getExitCode() {
         return exitCode;
     }
