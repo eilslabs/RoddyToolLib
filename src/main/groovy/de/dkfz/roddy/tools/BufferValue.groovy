@@ -90,4 +90,13 @@ public class BufferValue {
             return alignedValue
         return alignedValue * baseUnit.multiplier / unit.multiplier as Long
     }
+
+    @Override
+    boolean equals(Object other) {
+        if (other instanceof BufferValue &&
+                other.alignedValue == this.alignedValue) {
+            return true
+        }
+        return false
+    }
 }
