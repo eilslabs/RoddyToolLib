@@ -1,13 +1,14 @@
 /*
- * Copyright (c) 2017 eilslabs.
+ * Copyright (c) 2018 German Cancer Research Center (DKFZ).
  *
  * Distributed under the MIT License (license terms are at https://www.github.com/eilslabs/Roddy/LICENSE.txt).
  */
-
 package de.dkfz.roddy.tools
 
 import de.dkfz.roddy.StringConstants
 import de.dkfz.roddy.execution.io.LocalExecutionHelper
+import de.dkfz.roddy.tools.compression.Compressor
+import de.dkfz.roddy.tools.compression.CompressorUsingZipAndBash
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
 
@@ -15,6 +16,8 @@ import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.PosixFilePermissions
+
+import static de.dkfz.roddy.tools.shell.bash.Service.escape
 
 /**
  * Contains methods which print out text on the console, like listworkflows.
@@ -27,96 +30,9 @@ import java.nio.file.attribute.PosixFilePermissions
 @groovy.transform.CompileStatic
 class RoddyIOHelperMethods {
 
-
-    static abstract class Compressor {
-
-        void compress(File from, File to) {
-            if (from.isFile())
-                compressFile(from, to)
-
-            else if (from.isDirectory())
-                compressDirectory(from, to)
-        }
-
-        @Deprecated
-        void decompress(File from, File to, File wd) { decompress(from, to) }
-
-        abstract void decompress(File from, File to)
-
-        @Deprecated
-        void compressFile(File from, File to, File wd) { compressFile(from, to) }
-
-        abstract void compressFile(File from, File to)
-
-        @Deprecated
-        void compressDirectory(File from, File to, File wd) { compressDirectory(from, to) }
-
-        abstract void compressDirectory(File from, File to)
-
-        @Deprecated
-        GString getCompressionString(File from, File to, File wd) { getCompressionString(from, to) }
-
-        abstract GString getCompressionString(File from, File to)
-
-        @Deprecated
-        GString getDecompressionString(File from, File to, File wd) { getDecompressionString(from, to) }
-
-        abstract GString getDecompressionString(File from, File to)
-    }
-
-    /**
-     * Produces md5 compatible zipped archives of the input file / folder
-     * Also produces a file named [zip.gz].md5
-     */
-    static class NativeLinuxZipCompressor extends Compressor {
-
-        @Override
-        void compressFile(File from, File to) {
-            try {
-                compressDirectory(from, to)
-            } catch (Exception ex) {
-                throw new IOException("Could not zip file ${from} to zip archive ${to}", ex)
-            }
-        }
-
-        @Override
-        void compressDirectory(File from, File to) {
-
-            try {
-                String result = LocalExecutionHelper.executeSingleCommand(getCompressionString(from, to).toString())
-            } catch (Exception ex) {
-                throw new IOException("Could not zip folder ${from} to zip archive ${to}", ex)
-            }
-        }
-
-        @Override
-        void decompress(File from, File to) {
-            try {
-                String result = LocalExecutionHelper.executeSingleCommand(getDecompressionString(from, to))
-            } catch (Exception ex) {
-                throw new IOException("Could not unzip zip archive ${from} to ${to}", ex)
-            }
-        }
-
-        @Override
-        GString getCompressionString(File from, File to) {
-            String _to = to.getAbsolutePath()
-            GString zipTarget = "${_to} ${from.getName()}"
-
-            GString gString = "[[ -f \"${_to}\" ]] && rm ${_to}; cd ${from.parent} && zip -r9 ${zipTarget} > /dev/null && md5sum ${_to}"
-            return gString
-        }
-
-        @Override
-        GString getDecompressionString(File from, File to) {
-            GString gString = "[[ ! -d ${to} ]] && mkdir -p ${to}; cd ${to} && unzip -o ${from} > /dev/null"
-            return gString
-        }
-    }
-
     private static LoggerWrapper logger = LoggerWrapper.getLogger(RoddyIOHelperMethods.class.getSimpleName())
 
-    private static Compressor compressor = new NativeLinuxZipCompressor()
+    private static Compressor compressor = new CompressorUsingZipAndBash()
 
     static Compressor getCompressor() { return compressor }
 
@@ -218,11 +134,11 @@ class RoddyIOHelperMethods {
     /**
      *
      * @param file
-     * @param targetBaseFolder The target folder to which the archives content will be extracted.
+     * @param targetFolder The target folder to which the archives content will be extracted.
      * @param workingDirectory
      */
-    static void decompressFile(File file, File targetBaseFolder) {
-        compressor.decompress(file, targetBaseFolder)
+    static void decompressFile(File file, File targetFolder) {
+        compressor.decompress(file, targetFolder)
     }
 
     static String getStackTraceAsString(Exception exception) {
