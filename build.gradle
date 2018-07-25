@@ -40,11 +40,6 @@ dependencies {
 // Fix Java Version
 ext.langLevel = 1.8
 
-// Fix Gradle version
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.8'
-}
-
 task writePom {
     doLast {
         pom {

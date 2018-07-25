@@ -119,7 +119,6 @@ class Version implements Comparable<Version> {
         return this.compareTo(other, VersionLevel.REVISION) == 0
     }
 
-    @Override
     int compareTo(Version o) {
         return compareTo(o, VersionLevel.REVISION)
     }
