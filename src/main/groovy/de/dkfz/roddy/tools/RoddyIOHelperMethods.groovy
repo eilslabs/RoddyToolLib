@@ -1,13 +1,14 @@
 /*
- * Copyright (c) 2017 eilslabs.
+ * Copyright (c) 2018 German Cancer Research Center (DKFZ).
  *
  * Distributed under the MIT License (license terms are at https://www.github.com/eilslabs/Roddy/LICENSE.txt).
  */
-
 package de.dkfz.roddy.tools
 
 import de.dkfz.roddy.StringConstants
 import de.dkfz.roddy.execution.io.LocalExecutionHelper
+import de.dkfz.roddy.tools.compression.Compressor
+import de.dkfz.roddy.tools.compression.CompressorUsingZipAndBash
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
 
@@ -15,6 +16,8 @@ import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.PosixFilePermissions
+
+import static de.dkfz.roddy.tools.shell.bash.Service.escape
 
 /**
  * Contains methods which print out text on the console, like listworkflows.
@@ -27,149 +30,55 @@ import java.nio.file.attribute.PosixFilePermissions
 @groovy.transform.CompileStatic
 class RoddyIOHelperMethods {
 
+    private static LoggerWrapper logger = LoggerWrapper.getLogger(RoddyIOHelperMethods.class.getSimpleName())
 
-    public static abstract class Compressor {
-        public void compress(File from, File to, File workingDirectory) {
-            if (from.isFile())
-                compressFile(from, to, workingDirectory);
+    private static Compressor compressor = new CompressorUsingZipAndBash()
 
-            else if (from.isDirectory())
-                compressDirectory(from, to, workingDirectory);
-        }
+    static Compressor getCompressor() { return compressor }
 
-        public void compress(File from, File to) {
-            compress(from, to, null);
-        }
-
-        public abstract void decompress(File from, File to);
-
-        public abstract void decompress(File from, File to, File workingDirectory);
-
-        public abstract void compressFile(File from, File to);
-
-        public abstract void compressFile(File from, File to, File workingDirectory);
-
-        public abstract void compressDirectory(File from, File to);
-
-        public abstract void compressDirectory(File from, File to, File workingDirectory);
-
-        public abstract GString getCompressionString(File from, File to);
-
-        public abstract GString getDecompressionString(File from, File to);
-
-        public abstract GString getCompressionString(File from, File to, File workingDirectory);
-
-        public abstract GString getDecompressionString(File from, File to, File workingDirectory);
-    }
-
-    /**
-     * Produces md5 compatible zipped archives of the input file / folder
-     * Also produces a file named [zip.gz].md5
-     */
-    public static class NativeLinuxZipCompressor extends Compressor {
-
-        @Override
-        void compressFile(File from, File to, File workingDirectory = null) {
-            try {
-                compressDirectory(from, to, workingDirectory);
-            } catch (Exception ex) {
-                throw new IOException("Could not zip file ${from} to zip archive ${to}", ex)
-            }
-        }
-
-        @Override
-        void compressDirectory(File from, File to, File workingDirectory = null) {
-
-            try {
-                String result = LocalExecutionHelper.executeSingleCommand(getCompressionString(from, to, workingDirectory).toString());
-            } catch (Exception ex) {
-                throw new IOException("Could not zip folder ${from} to zip archive ${to}", ex)
-            }
-        }
-
-        @Override
-        void decompress(File from, File to, File workingDirectory = null) {
-            String result = LocalExecutionHelper.executeSingleCommand(getDecompressionString(from, to, workingDirectory));
-//            println(result);
-        }
-
-        private String getWorkingDirectory(File from, File workingDirectory = null) {
-            if (!workingDirectory) {
-                workingDirectory = from.getParentFile().getAbsoluteFile();
-            }
-            String wdPath = workingDirectory ? "cd ${workingDirectory.getAbsolutePath()} &&" : "";
-            return wdPath;
-        }
-
-        @Override
-        GString getCompressionString(File from, File to, File workingDirectory = null) {
-            String wdPath = getWorkingDirectory(from, workingDirectory);
-
-            String _to = to.getAbsolutePath()
-            GString zipTarget = "${_to} ${from.getName()} -x '*.svn*'"
-
-//            GString gString = "${wdPath} [[ -e ${_to} ]] && zip -dr9 ${zipTarget} || zip -r9 ${zipTarget}";
-            GString gString = "[[ -f \"${_to}\" ]] && rm ${_to}; ${wdPath} zip -r9 ${zipTarget} > /dev/null && md5sum ${_to}";
-            return gString;
-        }
-
-        @Override
-        GString getDecompressionString(File from, File to, File workingDirectory = null) {
-            String wdPath = getWorkingDirectory(to, workingDirectory);
-            GString gString = "${wdPath} unzip -o ${from} > /dev/null";
-            return gString;
-        }
-    }
-
-    private static LoggerWrapper logger = LoggerWrapper.getLogger(RoddyIOHelperMethods.class.getSimpleName());
-
-    private static Compressor compressor = new NativeLinuxZipCompressor();
-
-    public static Compressor getCompressor() { return compressor; }
-
-    public static String[] loadTextFile(File f) {
+    static String[] loadTextFile(File f) {
         try {
-            return f.readLines().toArray(new String[0]);
+            return f.readLines().toArray(new String[0])
         } catch (Exception ex) {
-            return new String[0];
+            return new String[0]
         }
     }
 
-    public static String loadTextFileEnblock(File f) {
+    static String loadTextFileEnblock(File f) {
         try {
-            return f.text;
+            return f.text
         } catch (Exception ex) {
-            return StringConstants.EMPTY;
+            return StringConstants.EMPTY
         }
     }
 
-    public static void writeTextFile(String path, List items) {
-        writeTextFile(new File(path), items);
+    static void writeTextFile(String path, List items) {
+        writeTextFile(new File(path), items)
     }
 
-    public static void writeTextFile(File path, List items) {
-        writeTextFile(path, items.collect { it.toString() }.join("\n") + "\n");
+    static void writeTextFile(File path, List items) {
+        writeTextFile(path, items.collect { it.toString() }.join("\n") + "\n")
     }
 
-    public static void writeTextFile(String path, String text) {
-        File f = new File(path);
-        writeTextFile(f, text);
+    static void writeTextFile(String path, String text) {
+        File f = new File(path)
+        writeTextFile(f, text)
     }
 
-    public static void writeTextFile(File file, String text) {
+    static void writeTextFile(File file, String text) {
         try {
-            file.write(text);
+            file.write(text)
         } catch (Exception ex) {
-            logger.severe(ex.toString());
+            logger.severe(ex.toString())
         }
     }
 
-    public static List<String> readTextFile(String path) {
-        return readTextFile(new File(path));
+    static List<String> readTextFile(String path) {
+        return readTextFile(new File(path))
     }
 
-    public static List<String> readTextFile(File path) {
-        return path.readLines();
+    static List<String> readTextFile(File path) {
+        return path.readLines()
     }
 
     /**
@@ -214,57 +123,67 @@ class RoddyIOHelperMethods {
         }
     }
 
-    public static void compressFile(File file, File targetFile, File workingDirectory = null) {
-        compressor.compressFile(file, targetFile, workingDirectory)
+    static void compressFile(File file, File targetFile) {
+        compressor.compressFile(file, targetFile)
     }
 
-    public static void compressDirectory(File file, File targetFile, File workingDirectory = null) {
-        compressor.compressDirectory(file, targetFile, workingDirectory)
+    static void compressDirectory(File file, File targetFile) {
+        compressor.compressDirectory(file, targetFile)
     }
 
-    public static String getStackTraceAsString(Exception exception) {
+    /**
+     *
+     * @param file
+     * @param targetFolder The target folder to which the archives content will be extracted.
+     * @param workingDirectory
+     */
+    static void decompressFile(File file, File targetFolder) {
+        compressor.decompress(file, targetFolder)
+    }
+
+    static String getStackTraceAsString(Exception exception) {
         try {
-            StackTraceElement[] stackTrace = null;
+            StackTraceElement[] stackTrace = null
             for (int i = 0; i < 3 && stackTrace == null; i++)
-                stackTrace = exception.getStackTrace();
+                stackTrace = exception.getStackTrace()
             if (stackTrace != null)
-                return joinArray(stackTrace, System.getProperty("line.separator"));
+                return joinArray(stackTrace, System.getProperty("line.separator"))
         } catch (Exception ex) {
             logger.info("No stacktrace could be printed for an exception.")
-            return "";
+            return ""
         }
     }
 
-    public static String join(String separator = "\n", String... entries) {
+    static String join(String separator = "\n", String... entries) {
         return joinArray(entries as String[], separator)
     }
 
-    public static String joinArray(Object[] array, String separator) {
-        return array.collect { it -> it.toString() }.join(separator);
+    static String joinArray(Object[] array, String separator) {
+        return array.collect { it -> it.toString() }.join(separator)
     }
 
-    public static String joinArray(String[] array, String separator) {
-        return array.join(separator);
+    static String joinArray(String[] array, String separator) {
+        return array.join(separator)
     }
 
-    public static String joinTextFileContent(String[] array) {
-        return joinArray(array, System.lineSeparator());
+    static String joinTextFileContent(String[] array) {
+        return joinArray(array, System.lineSeparator())
     }
 
-    public static String getMD5OfText(String text) {
-        return DigestUtils.md5Hex(text);
+    static String getMD5OfText(String text) {
+        return DigestUtils.md5Hex(text)
     }
 
-    public static String getMD5OfFile(File f) {
+    static String getMD5OfFile(File f) {
         try {
-            return DigestUtils.md5Hex(new FileInputStream(f));
+            return DigestUtils.md5Hex(new FileInputStream(f))
         } catch (Exception ex) {
-            logger.warning("Could not md5 file ${f.absolutePath} " + ex.toString());
-            return "";
+            logger.warning("Could not md5 file ${f.absolutePath} " + ex.toString())
+            return ""
         }
     }
 
-    public static String getMD5OfPermissions(File f) {
+    static String getMD5OfPermissions(File f) {
         try {
             PosixFileAttributeView view = Files.getFileAttributeView(f.toPath(), PosixFileAttributeView.class) as PosixFileAttributeView
             return DigestUtils.md5Hex(PosixFilePermissions.toString(view.readAttributes().permissions()))
@@ -274,7 +193,7 @@ class RoddyIOHelperMethods {
         }
     }
 
-    public static String truncateCommand(String inStr, int maxLength = 80) {
+    static String truncateCommand(String inStr, int maxLength = 80) {
         if (maxLength > 0 && inStr?.size() > maxLength) {
             if (maxLength > 4) {
                 return inStr[0..(maxLength - 4)] + " ..."
@@ -283,7 +202,7 @@ class RoddyIOHelperMethods {
             }
         } else {
             return inStr
-        };
+        }
     }
 
     /**
@@ -321,46 +240,46 @@ class RoddyIOHelperMethods {
                 String md5OfPermissions = getMD5OfPermissions(file)
                 md5s << md5OfDir + md5OfFile + md5OfPermissions
         }
-        return getMD5OfText(md5s.join(System.getProperty("line.separator")));
+        return getMD5OfText(md5s.join(System.getProperty("line.separator")))
     }
 
-    public static synchronized void appendLineToFile(File file, String line) {
-        file.append(line + System.getProperty("line.separator"));
+    static synchronized void appendLineToFile(File file, String line) {
+        file.append(line + System.getProperty("line.separator"))
     }
 
-    public static File assembleLocalPath(String rootPath, String... structure) {
-        return assembleLocalPath(new File(rootPath), structure);
+    static File assembleLocalPath(String rootPath, String... structure) {
+        return assembleLocalPath(new File(rootPath), structure)
     }
 
-    public static File assembleLocalPath(File rootPath, String... structure) {
+    static File assembleLocalPath(File rootPath, String... structure) {
         if (!structure)
-            return rootPath;
-        File result = new File(rootPath, structure[0]);
+            return rootPath
+        File result = new File(rootPath, structure[0])
         for (int i = 1; i < structure.length; i++) {
-            result = new File(result, structure[i]);
+            result = new File(result, structure[i])
         }
-        return result;
+        return result
     }
 
     private static final String calculateUMaskFromStringWithBash(String rightsStr, int defaultUserMask) {
         def defaultRights = numericToHashAccessRights(defaultUserMask)
-        return LocalExecutionHelper.executeSingleCommand("umask ${defaultRights.values().join("")} && umask ${rightsStr} && umask");
+        return LocalExecutionHelper.executeSingleCommand("umask ${defaultRights.values().join("")} && umask ${rightsStr} && umask")
     }
 
-    public static final String convertUMaskToAccessRights(String umask) {
+    static final String convertUMaskToAccessRights(String umask) {
         String ars = new String("0")
         for (int i = 1; i < umask.length(); i++) {
             ars += "" + (7 - umask[i].toInteger())
         }
-        return ars;
+        return ars
     }
 
-    public static final int getIntegerValueFromOctalAccessRights(String octalAccessRights) {
-        return Integer.decode(octalAccessRights);
+    static final int getIntegerValueFromOctalAccessRights(String octalAccessRights) {
+        return Integer.decode(octalAccessRights)
     }
 
-    public static final int symbolicToIntegerAccessRights(String rightsStr, int defaultUserMask) {
-        return getIntegerValueFromOctalAccessRights(symbolicToNumericAccessRights(rightsStr, defaultUserMask));
+    static final int symbolicToIntegerAccessRights(String rightsStr, int defaultUserMask) {
+        return getIntegerValueFromOctalAccessRights(symbolicToNumericAccessRights(rightsStr, defaultUserMask))
     }
 
     /** Convert symbolic to numeric access rights.
@@ -371,13 +290,13 @@ class RoddyIOHelperMethods {
      * @param rightsStr string representation of access rights
      * @return numeric access rights
      */
-    public static String symbolicToNumericAccessRights(String rightsStr, int defaultUserMask) {
+    static String symbolicToNumericAccessRights(String rightsStr, int defaultUserMask) {
 
         return convertUMaskToAccessRights(calculateUMaskFromStringWithBash(rightsStr, defaultUserMask))
 
     }
 
-    public static LinkedHashMap<String, Integer> numericToHashAccessRights(int rights) {
+    static LinkedHashMap<String, Integer> numericToHashAccessRights(int rights) {
         assert rights <= 07777  // including suid, sgid, sticky bits.
         return [u: (rights & 0700) >> 6,
                 g: (rights & 0070) >> 3,
@@ -420,7 +339,7 @@ class RoddyIOHelperMethods {
      * @param path Path containing the value. The path value that is matched in here will be returned
      * @return
      */
-    public static Optional<String> getPatternVariableFromPath(String pattern, String variable, String path) {
+    static Optional<String> getPatternVariableFromPath(String pattern, String variable, String path) {
         ArrayList<String> patternComponents = splitPathname(pattern)
         ArrayList<String> pathComponents = splitPathname(path)
         Integer index = 0
@@ -440,7 +359,7 @@ class RoddyIOHelperMethods {
     }
 
 
-    public static String printTimingInfo(String info, long t1, long t2) {
-        return "Timing " + info + ": " + ((t2 - t1) / 1000000) + " ms";
+    static String printTimingInfo(String info, long t1, long t2) {
+        return "Timing " + info + ": " + ((t2 - t1) / 1000000) + " ms"
     }
 }
