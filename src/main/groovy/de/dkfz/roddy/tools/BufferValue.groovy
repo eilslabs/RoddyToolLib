@@ -17,7 +17,7 @@ package de.dkfz.roddy.tools
  */
 public class BufferValue {
 
-    /**
+/**
      * The stored value aligned to KiloByte
      */
     private Long alignedValue;
@@ -89,5 +89,24 @@ public class BufferValue {
         if (alignedValue < unit.multiplier)
             return alignedValue
         return alignedValue * baseUnit.multiplier / unit.multiplier as Long
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (getClass() != o.class) return false
+
+        BufferValue that = (BufferValue) o
+
+        if (alignedValue != that.alignedValue) return false
+        if (baseUnit != that.baseUnit) return false
+
+        return true
+    }
+
+    int hashCode() {
+        int result
+        result = (alignedValue != null ? alignedValue.hashCode() : 0)
+        result = 31 * result + (baseUnit != null ? baseUnit.hashCode() : 0)
+        return result
     }
 }
