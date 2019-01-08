@@ -362,4 +362,21 @@ class RoddyIOHelperMethods {
     static String printTimingInfo(String info, long t1, long t2) {
         return "Timing " + info + ": " + ((t2 - t1) / 1000000) + " ms"
     }
+
+    /**
+     * Will format a map to a two column table. The width of the first column will be calculated using the length of the
+     * longest element.
+     * @param map
+     * @param cntOfTabs
+     * @param tabSep
+     * @param closureForValue
+     * @return
+     */
+    static List<String> convertMapToTwoColumnsFormattedTable(Map<String, ?> map, int cntOfTabs, String tabSep, Closure closureForValue) {
+        final int keyWidth = map.keySet().collect { it.size() }.max()
+        map.collect {
+            def k, def v ->
+                ("\t" * cntOfTabs) + k.toString().padRight(keyWidth) + tabSep + closureForValue(v)
+        }
+    }
 }
