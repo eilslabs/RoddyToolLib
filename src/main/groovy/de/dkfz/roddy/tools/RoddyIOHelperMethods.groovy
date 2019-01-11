@@ -17,8 +17,6 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.PosixFilePermissions
 
-import static de.dkfz.roddy.tools.shell.bash.Service.escape
-
 /**
  * Contains methods which print out text on the console, like listworkflows.
  * This is a bit easier in groovy so we'll use it for these tasks.
@@ -358,8 +356,36 @@ class RoddyIOHelperMethods {
         return Optional.empty()
     }
 
-
+    /**
+     * Print out the difference of nanosecond measurements (long, System.nanotime()) in a human readable way with a
+     * message and in milli seconds.
+     * @param info
+     * @param t1
+     * @param t2
+     * @return
+     */
     static String printTimingInfo(String info, long t1, long t2) {
         return "Timing " + info + ": " + ((t2 - t1) / 1000000) + " ms"
+    }
+
+    /**
+     * Will format a map to a two column table. The width of the first column will be calculated using the length of the
+     * longest element. This methods output is not intended to be parsed but to be human readable.
+     *
+     * Can be used like:
+     * convert...Table(aMapWithFiles, 1, " : ", { File v -> v.absolutePath }
+     *
+     * @param map A map with objects (File in the example)
+     * @param cntOfTabs Number of tabs in front of each line
+     * @param tabSep Sign for the separator
+     * @param closureForValue Is used to select something to print from the objects in the map
+     * @return
+     */
+    static List<String> convertMapToTwoColumnsPrettyTable(Map<String, ?> map, int cntOfTabs, String tabSep, Closure closureForValue) {
+        final int keyWidth = map.keySet().collect { it.size() }.max()
+        map.collect {
+            def k, def v ->
+                ("\t" * cntOfTabs) + k.toString().padRight(keyWidth) + tabSep + closureForValue(v)
+        }
     }
 }
