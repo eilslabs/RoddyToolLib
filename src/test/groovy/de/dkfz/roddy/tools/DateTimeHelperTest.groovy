@@ -35,7 +35,7 @@ class DateTimeHelperTest extends Specification {
 
         where:
         parserPattern        | locale         | timeString                                 | expectedResult
-        null                 | Locale.ENGLISH | "2011-12-03T10:15:30+01:00[Europe/Berlin]" | ZonedDateTime.of(2011, 12, 3, 10, 15, 30, 0, ZoneId.systemDefault())
+        null                 | Locale.ENGLISH | "2011-12-03T10:15:30+01:00[Europe/Berlin]" | ZonedDateTime.of(2011, 12, 3, 10, 15, 30, 0, ZoneId.of("Europe/Berlin"))
         "MMM ppd HH:mm yyyy" | Locale.ENGLISH | "Jan  7 10:00 2000"                        | ZonedDateTime.of(2000, 1, 7, 10, 0, 0, 0, ZoneId.systemDefault())
         "MMM ppd HH:mm yyyy" | Locale.ENGLISH | "Dec 28 19:56 2000"                        | ZonedDateTime.of(2000, 12, 28, 19, 56, 0, 0, ZoneId.systemDefault())
         "MMM ppd HH:mm yyyy" | Locale.GERMAN  | "Dez 28 19:57 2000"                        | ZonedDateTime.of(2000, 12, 28, 19, 57, 0, 0, ZoneId.systemDefault())
