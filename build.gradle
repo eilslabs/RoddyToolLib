@@ -71,3 +71,18 @@ jar {
         from "$buildDir/pom.xml"
     }
 }
+
+test {
+    workingDir = System.getProperty("user.dir")
+    ignoreFailures = project.hasProperty("ignoreFailedTests")
+
+    testLogging {
+        debug {
+            events "started", "skipped", "failed"
+            exceptionFormat "full"
+        }
+        events "failed"
+        exceptionFormat "full"
+        setShowStandardStreams true
+    }
+}
