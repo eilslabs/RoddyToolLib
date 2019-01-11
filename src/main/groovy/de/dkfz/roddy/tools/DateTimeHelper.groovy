@@ -13,12 +13,12 @@ class DateTimeHelper {
 
     private final DateTimeFormatter DATE_PATTERN
 
-    DateTimeHelper(String dateParserPatternPattern = null, Locale locale = Locale.default, ZoneId timeZoneId = ZoneId.systemDefault()) {
-        if (!dateParserPatternPattern)
+    DateTimeHelper(String dateParserPattern = null, Locale locale = Locale.default, ZoneId timeZoneId = ZoneId.systemDefault()) {
+        if (!dateParserPattern)
             DATE_PATTERN = DateTimeFormatter.ISO_DATE_TIME
         else
             this.DATE_PATTERN = DateTimeFormatter
-                    .ofPattern(dateParserPatternPattern)
+                    .ofPattern(dateParserPattern)
                     .withLocale(locale)
                     .withZone(timeZoneId ?: ZoneId.systemDefault())
     }
