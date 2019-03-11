@@ -94,7 +94,7 @@ class RoddyConversionHelperMethods {
     }
 
     static boolean isDefinedArray(String value) {
-        return !isNullOrEmpty(value) && ([value.trim()[0], value.trim()[-1]] == ["(", ")"]) // What else to test??
+        return !isNullOrEmpty(value?.trim()) && ([value.trim()[0], value.trim()[-1]] == ["(", ")"]) // What else to test??
     }
 
     @CompileStatic(TypeCheckingMode.SKIP)
