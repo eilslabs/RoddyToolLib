@@ -92,6 +92,7 @@ class RoddyConversionHelperMethodsTest extends GroovyTestCase {
     }
 
     void testIsDefinedArray() {
+        assert !RoddyConversionHelperMethods.isDefinedArray(" ")    // false on whitespace-only string (no exception)
         assert RoddyConversionHelperMethods.isDefinedArray("( )")
         assert RoddyConversionHelperMethods.isDefinedArray("( a b )")
         assert RoddyConversionHelperMethods.isDefinedArray("( a )")
