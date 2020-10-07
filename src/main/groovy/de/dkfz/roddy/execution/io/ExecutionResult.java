@@ -20,24 +20,31 @@ public class ExecutionResult extends InfoObject {
     /**
      * This can hold some sort of process id for a process
      */
-    public final String processID;
+    protected final String processID;
 
     /**
      * Successful or not?
      */
-    public final boolean successful;
+    protected final boolean successful;
     /**
      * All result lines.
      */
-    public final List<String> resultLines;
+    protected final List<String> resultLines;
     /**
      * First line of the result array.
      * Null if no entries are in the array.
      */
-    public final String firstLine;
+    protected final String firstLine;
 
-    public final int exitCode;
+    protected final int exitCode;
 
+    /** Contain the results of an execution. Note that the usage of this class is quite inconsistent.
+     *
+     * @param successful   Whether the execution was successful. Some tools have exit code == 0 but are yet not successful.
+     * @param exitCode     The actual exit code. (Warning: Often this is zero, because waitFor == false).
+     * @param resultLines  This should be the standard output and error (interleaved). (Warning: Often this is only stdout).
+     * @param processID    The process ID, if available.
+     */
     public ExecutionResult(boolean successful, int exitCode, List<String> resultLines, String processID) {
 
         this.processID = processID;
@@ -50,8 +57,24 @@ public class ExecutionResult extends InfoObject {
             firstLine = null;
     }
 
+    public String getProcessID() {
+        return processID;
+    }
+
+    public int getExitCode() {
+        return exitCode;
+    }
+
+    public String getFirstLine() {
+        return firstLine;
+    }
+
+    public List<String> getResultLines() {
+        return resultLines;
+    }
+
     public boolean isSuccessful() {
-        return exitCode == 0;
+        return successful;
     }
 
     public boolean getSuccessful() {
