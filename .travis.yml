@@ -6,20 +6,8 @@ cache:
   directories:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
-before_install:
-  - curl -s get.sdkman.io | bash
-  - source "$HOME/.sdkman/bin/sdkman-init.sh"
-  - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
-  - source "/home/travis/.sdkman/bin/sdkman-init.sh"
-  - sdk install java 8.0.252-open
-  - sdk use     java 8.0.252-open
-  - export JAVA_HOME="$HOME/.sdkman/candidates/java/current"
-  - export JAVA_ROOT="$JAVA_HOME"
-  - export JRE_HOME="$JAVA_HOME"
-  - export JDK_HOME="$JAVA_HOME"
-  - sdk install groovy 2.4.19
-  - sdk use     groovy 2.4.19
-  - groovy --version
+jdk:
+  - openjdk8
 deploy:
   skip_cleanup: true
   provider: releases
