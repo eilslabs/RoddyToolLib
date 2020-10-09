@@ -62,7 +62,7 @@ class LocalExecutionHelper {
     }
 
     /**
-     * Execute a command using the local command interpreter (For Linux this might be bash)
+     * Execute a command using the local command interpreter Bash (currently fixed).
      *
      * If outputStream is set, the full output is going to this stream. Otherwise it is stored
      * in the returned object.
@@ -71,16 +71,15 @@ class LocalExecutionHelper {
      * @param outputStream
      * @return
      */
-    public static ExecutionResult executeCommandWithExtendedResult(String command, OutputStream outputStream = null) {
+    static ExecutionResult executeCommandWithExtendedResult(String command, OutputStream outputStream = null) {
         //Process process = Roddy.getLocalCommandSet().getShellExecuteCommand(command).execute();
         Process process = ["bash", "-c", command].execute();
 
         //TODO Put to a custom class which can handle things for Windows as well.
         String processID = getProcessID(process)
 
-        List<String> lines = [];
-        if (logger.isVerbosityHigh())
-            println("Executing the command ${command} locally.");
+        List<String> lines = []
+        logger.postRareInfo("Executing the command ${command} locally.")
 
         if (outputStream)
             process.waitForProcessOutput(outputStream, outputStream)

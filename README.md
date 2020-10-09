@@ -1,8 +1,8 @@
 # ToolLib
 
-[![Build Status - Travis](https://travis-ci.org/eilslabs/RoddyToolLib.svg?branch=develop)](https://travis-ci.org/eilslabs/RoddyToolLib)
+[![Build Status - Travis](https://travis-ci.org/TheRoddyWMS/RoddyToolLib.svg?branch=develop)](https://travis-ci.org/TheRoddyWMS/RoddyToolLib)
 
-Tool library used in [BatchEuphoria](https://github.com/eilslabs/BatchEuphoria) and [Roddy](https://github.com/eilslabs/Roddy).
+Tool library used in [BatchEuphoria](https://github.com/TheRoddyWMS/BatchEuphoria) and [Roddy](https://github.com/TheRoddyWMS/Roddy).
 
 ## Build
 
