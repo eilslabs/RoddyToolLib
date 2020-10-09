@@ -75,12 +75,13 @@ class LocalExecutionHelper {
         //Process process = Roddy.getLocalCommandSet().getShellExecuteCommand(command).execute();
         Process process = ["bash", "-c", command].execute();
 
-        //TODO Put to a custom class which can handle things for Windows as well.
+        // TODO Put to a custom class which can handle things for Windows as well.
         String processID = getProcessID(process)
 
         List<String> lines = []
         logger.postRareInfo("Executing the command ${command} locally.")
 
+        // TODO This should not return the stderr and stdout intermingled (in contrast to SSHExecutionService).
         if (outputStream)
             process.waitForProcessOutput(outputStream, outputStream)
         else {
