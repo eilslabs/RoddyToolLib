@@ -13,6 +13,9 @@ import java.util.List;
 /**
  * Stores the result of a command execution.
  * Commands can i.e. be executed via ssh or on the local command line.
+ *
+ *  TODO Make ExecutionResult and AsyncExecutionResult common subclasses of an IExecutionResult interface.
+ *
  * @author michael
  */
 public class ExecutionResult extends InfoObject {
@@ -38,10 +41,14 @@ public class ExecutionResult extends InfoObject {
 
     protected final int exitCode;
 
-    /** Contain the results of an execution. Note that the usage of this class is quite inconsistent.
+    /** Contain the results of an execution. Note that the usage of this class is quite inconsistent. In particular
+     *  occasionally the result indicates success, but the process actually failed.
      *
-     * @param successful   Whether the execution was successful. Some tools have exit code == 0 but are yet not successful.
-     * @param exitCode     The actual exit code. (Warning: Often this is zero, because waitFor == false).
+     * @param successful   Whether the execution was successful. Some tools produce an exit code == 0 but may still
+     *                     have failed. A prominent example is the BWA aligner. For this reason the successful field
+     *                     allows specifying success from e.g. standard output or error of the process rather than
+     *                     just the exit code.
+     * @param exitCode     The actual exit code.
      * @param resultLines  This should be the standard output and error (interleaved). (Warning: Often this is only stdout).
      * @param processID    The process ID, if available.
      */

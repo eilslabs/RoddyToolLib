@@ -5,6 +5,8 @@ import java.util.concurrent.CompletableFuture
 
 /** Like ExecutionResult, but taking Futures of the exit code (usually the actual process) and the standard output and
  *  error streams. Calling any of the methods will block until the process is finished!
+ *
+ *  TODO Make ExecutionResult and AsyncExecutionResult common subclasses of an IExecutionResult interface.
  */
 class AsyncExecutionResult extends ExecutionResult {
 
