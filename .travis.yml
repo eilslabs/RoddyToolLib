@@ -7,12 +7,12 @@ cache:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
 jdk:
-  - openjdk8
+- openjdk8
 deploy:
   skip_cleanup: true
   provider: releases
   api_key:
-    secure: W08AAlhsqzhOQyrvhAr757gMfnMbN1yFZmPW0TmZ2YTqSPj72tP65RH1bSkgVP+OJt6mhqEI+VdpwlW/O706BBG5bWZo0z1TV0ExZxyzamhOaVouW97/bnVPAyM716otLGkC+EqOfsvm5IL7D+oiscd/xZslkkBeQjICvCexZln9KRLRNEf92n+VrI/TT0yhDpDhGM5XXKFSh66WQWuUYgxHGbMiDUrkPS1PWpqSlGRPGdk1kKyfRCjFwb9dZfuzWqcuLa3dvjOdN1qONRe5gjXd/ufMtBcMjF9AgxdxXACsEKG2qGRRSUF/Adr+/jfg7/B99x3/8x4qL9lVQd+d+bqP4IZJQzkPI92exDr50SeUQepqNuSqqKiB49DYU2ZHSIQ56KfcpAvqDJnz2eo2njGxcF8jIvteDe7/7HF/5HBXeHMPLXIQ7zj8rXkGWzpS+QRjvEgaHzCR50tKknMX6eFo5NIFl6E2RiuGJfrHwHmPlJrAiGlRG4nDSlTvdgEVmDCRvxJt486N+tk9+szdWeqnFIiDDim7PzsimWoy0F9s9TTMhvcoMr7qPhpDqGTAz+TFy1HIvPzQsA20rwiHddmdff+yIGIfTlfPFwQPT4FBKG/3rRHChH4YX1bm6BCFH4kLS/57gl7/omBngFHL6xF3D8uko890KhcgllzN37U=
+    secure: 3q37jIBy+3hAFXRbKuLf7+gOGm1YSiTCA/cCqkefbQBZW9bfurXdaw69R55ZR81xnbQ6/EtzZqgCjTDgL016qmkdem27Jk9VAvMtM61pQrX78JUeXioG6rlYj4OOGk3D3e+b5PMSzaL5GEu8T0VIVEw5dKWffziIIa2pD9gAXWoZpuwgUyK5NQS+fEnB7Rla0DKz7RcVeXcBViXO4I0VMyWHIsafSFo/YAgTvyvoYzcBNrJRXgoYAAHX8jTTgmd+EkIvu+jAK73ZjPY3RvMSbDH2vh07+ozb80fw6NdEszFMAwr5Q9y68AMzhyhZAk52Z1jwJaf8Q71viLL2ociQ/cxxqsOCociioX/2ZMKv91F8lbWfKWZxguTrsg59Vk8mqIji7hsXPBNNZyD0m+12DikpAMVW2sYpSADmL2Px0/YrEP0aWbyDW6IOt6CM+Z+YZy9e+LsLLYsAHqXZhgJXusgKCLD7I6gxQ1jcQ8APseEFcIKc8Hqp3h46eRH/wt9nExzG/DNIEhBCLe9YoG00IjlBHu8qLj/Mzgc51bYHRLBdGe66DlFEljlQ9G3AUNvYHETWkrfkyMHEL8jh7twQn0SRQRvfmqz3N/45qlPzRUiWfsnE35bMiFfo2kc16pVYY4dRtAjUrHYUwNDbuJZhEx/gTN9HjYq6RAL7jwYfVQw=
   file: build/libs/RoddyToolLib-*.jar
   file_glob: true
   on:
@@ -20,4 +20,3 @@ deploy:
     branch: master
     tags: true
   overwrite: true
-  
