@@ -31,8 +31,9 @@ public class ExecutionResult extends InfoObject {
     protected final boolean successful;
     /**
      * All result lines.
+     * TODO: Make protected. This is public to avoid having to also update BatchEuphoria, which references the field.
      */
-    protected final List<String> resultLines;
+    public final List<String> resultLines;
     /**
      * First line of the result array.
      * Null if no entries are in the array.
