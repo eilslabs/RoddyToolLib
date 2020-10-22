@@ -85,7 +85,7 @@ class LocalExecutionHelper {
         if (outputStream)
             process.waitForProcessOutput(outputStream, outputStream)
         else {
-            StringBuilder sstream = new StringBuilder();
+            StringBuffer sstream = new StringBuffer();
             process.waitForProcessOutput(sstream, sstream);
             lines = sstream.readLines().collect { String l -> return l.toString(); };
         }
