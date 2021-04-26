@@ -22,3 +22,15 @@ systemProp.https.proxyPort=HTTPS_proxy_port
 ```
 
 where you substitute the correct proxies and ports required for your environment.
+
+## Changelog
+
+* 0.0.8
+
+  - Refactored `AsyncExecutionResult` and `ExecutionResult` to improve the stdout and stderr handling. This also affects `ExecutionResult.resultLines` field/accessors.
+  - Improved support for additional output stream in `LocalExecutionHelper`
+  - Changes are required for Roddy 3.6.1 improvements related to better error reporting and handling.  
+
+* 0.0.7
+
+  - Added `AsyncExecutionResult` to handle asynchronous execution of command executions.

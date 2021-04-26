@@ -12,8 +12,8 @@ class Service {
      * @param var
      * @return
      */
-    static String escape(String var) {
-        return var.collectReplacements { Character c ->
+    static String escape(String val) {
+        return val.collectReplacements { Character c ->
             specialCharacters.contains(c as String) ? "\\${c}" as String : "${c}" as String
         }
     }

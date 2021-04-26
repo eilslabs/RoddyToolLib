@@ -8,17 +8,27 @@ package de.dkfz.roddy.execution.io
 
 import de.dkfz.roddy.core.InfoObject
 import de.dkfz.roddy.tools.LoggerWrapper
+import groovy.transform.CompileStatic
 
 import java.lang.reflect.Field
+import java.nio.charset.Charset
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.function.Supplier
 
-@groovy.transform.CompileStatic
+@CompileStatic
 class LocalExecutionHelper {
+
     private static final LoggerWrapper logger = LoggerWrapper.getLogger(LocalExecutionHelper.class.name);
 
-    public static String getProcessID(Process process) {
+    private static final ExecutorService executorService = Executors.newCachedThreadPool()
+
+    static Integer getProcessID(Process process) {
         Field f = process.getClass().getDeclaredField("pid");
         f.setAccessible(true);
-        String processID = f.get(process)
+        Integer processID = f.get(process) as Integer
         return processID
     }
 
@@ -57,8 +67,42 @@ class LocalExecutionHelper {
         return chomp(text) //Cut off trailing "\n"
     }
 
-    public static String chomp(String text) {
+    static String chomp(String text) {
         text.length() >= 2 ? text[0..-2] : text
+    }
+
+    /** Read from an InputStream asynchronously using the executorService.
+     *  May throw an UncheckedIOException.
+     */
+    static CompletableFuture<List<String>> asyncReadStringStream(
+            InputStream inputStream,
+            ExecutorService executorService) {
+        return CompletableFuture.supplyAsync({
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+            reader.lines().toArray() as List<String>
+        } as Supplier<List<String>>, executorService)
+    }
+
+    /** This method is like asyncReadStringStream, but additionally copies the inputStream content
+     *  to the outputStream.
+     */
+    static CompletableFuture<List<String>> asyncReadStringStream(
+            InputStream inputStream,
+            ExecutorService executorService,
+            OutputStream outputStream) {
+        return CompletableFuture.supplyAsync({
+            // Make sure the same charset is used for input and output. This is what
+            // InputStreamReader(InputStream) uses internally.
+            String charsetName = Charset.defaultCharset().name()
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charsetName))
+            List<String> result = []
+            reader.eachLine {line ->
+                result.add(line)
+                // The reader removes the newlines, so we add them back here. UNIX only.
+                byte[] bytes = (line + "\n").getBytes(charsetName)
+                outputStream.write(bytes, 0, bytes.size())
+            }
+        } as Supplier<List<String>>, executorService)
     }
 
     /**
@@ -71,28 +115,28 @@ class LocalExecutionHelper {
      * @param outputStream
      * @return
      */
-    static ExecutionResult executeCommandWithExtendedResult(String command, OutputStream outputStream = null) {
-        Process process = ["bash", "-c", command].execute();
-
-        // TODO Put to a custom class which can handle things for Windows as well.
-        String processID = getProcessID(process)
-
-        List<String> lines = []
+    static ExecutionResult executeCommandWithExtendedResult(
+            String command,
+            OutputStream outputStream = null,
+            ExecutorService executorService = executorService) {
+        List<String> bashCommand = ["bash", "-c", command]
         logger.postRareInfo("Executing the command ${command} locally.")
-
-        // TODO This should not return the stderr and stdout intermingled (in contrast to SSHExecutionService).
-        // WARNING: There are no guarantees that stderr is written after stderr or otherwise. Output may be unpredictable!
-        if (outputStream)
-            process.waitForProcessOutput(outputStream, outputStream)
-        else {
-            StringBuffer sstream = new StringBuffer();
-            process.waitForProcessOutput(sstream, sstream);
-            lines = sstream.readLines().collect { String l -> return l.toString(); };
-        }
-        return new ExecutionResult(process.exitValue() == 0, process.exitValue(), lines, processID);
+        ProcessBuilder processBuilder = new ProcessBuilder(bashCommand)
+        Process process = processBuilder.start()
+        Future<List<String>> stdout
+        if (outputStream == null)
+            stdout = asyncReadStringStream(process.inputStream, executorService)
+        else
+            stdout = asyncReadStringStream(process.inputStream, executorService, outputStream)
+        Future<List<String>> stderr = asyncReadStringStream(process.errorStream, executorService)
+        Future<Integer> exitCode = CompletableFuture.supplyAsync({
+            process.waitFor()
+        } as Supplier<Integer>, executorService)
+        return new AsyncExecutionResult(bashCommand, getProcessID(process),
+                exitCode, stdout, stderr).asExecutionResult()
     }
 
-    public static Process executeNonBlocking(String command) {
+    static Process executeNonBlocking(String command) {
         Process process = ("sleep 1; " + command).execute();
         return process;
     }
